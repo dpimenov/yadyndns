@@ -4,10 +4,20 @@ import requests
 import yapy
 import settings
 
+from daemonize import Daemonize
+
+
+log_level = getattr(logging, settings.LOGLEVEL)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.DEBUG)
+logger.setLevel(log_level)
+logger.propagate = False
+fh = logging.FileHandler(settings.LOG_FILE, "w")
+fh.setLevel(log_level)
+logger.addHandler(fh)
+
+keep_fds = [fh.stream.fileno()]
 
 
 def main():
@@ -42,4 +52,5 @@ def dns_record(dns, domain, subdomain):
 
 
 if __name__ == '__main__':
-    main()
+    daemon = Daemonize(app='dyndns', pid=settings.PID_FILE, action=main, keep_fds=keep_fds)
+    daemon.start()

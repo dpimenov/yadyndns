@@ -1,1 +1,2 @@
 requests==2.11.1
+daemonize==2.4.7
